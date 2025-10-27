@@ -8,27 +8,147 @@ format: typst
 ## **Part 0: libraries**
 
 ```{r}
-
+install.packages("maps")
+install.packages("sf")
+library(tidyverse)
+library(dplyr)
+library(tidyr)
+library(maps)
+library(sf)
+library(ggplot2)
 ```
 
 ## **Part 1:** **Defining Research Question**
 
-Chosen Question:
+Chosen Question: What percentage of each state's total energy came from renewable sources in 2023, and how does this map geographically across the US?
+
+```{r}
+top_10 <- energy_data %>% arrange(desc(renewable_pct)) %>% head(10)
+bottom_10 <- energy_data %>% arrange(renewable_pct) %>% head(10)
+
+top_bottom <- bind_rows(
+  top_10 %>% mutate(category = "Top 10"),
+  bottom_10 %>% mutate(category = "Bottom 10")
+)
+
+ggplot(top_bottom, aes(x = reorder(state, renewable_pct), y = renewable_pct)) +
+  geom_col(aes(fill = category), show.legend = TRUE) +
+  scale_fill_manual(values = c("Top 10" = "#059669", "Bottom 10" = "#ef4444"), 
+                    name = "") +
+  coord_flip() +
+  geom_text(aes(label = paste0(round(renewable_pct, 1), "%")),
+            hjust = -0.1, size = 3) +
+  labs(
+    title = "States with Highest and Lowest Renewable Energy (2023)",
+    x = "State",
+    y = "Renewable Energy (%)"
+  ) +
+  theme_minimal() +
+  ylim(0, 90)
+```
 
 ## **Part 2: Data Preparation and Cleaning**
 
 ```{r}
+renew_2023 <- read.csv("data/renew-use-2023.csv", stringsAsFactors = FALSE)
 
+names(renew_2023) <- tolower(names(renew_2023))
+names(renew_2023) <- str_replace_all(names(renew_2023), "[ .]", "_")
+
+cat("Renewable Energy Column Names (standardized):\n")
+print(names(renew_2023))
+
+renew_2023_clean <- renew_2023 |>
+  mutate(
+    state = toupper(state),
+    renewable_use_2023 = str_remove_all(renewable_use_2023, " kWh"),
+    renewable_use_2023 = str_remove_all(renewable_use_2023, " MWh"),
+    state = str_trim(state),
+    renewable_use_2023 = as.numeric(renewable_use_2023))
+
+cat("\nState names after standardization (first 10):\n")
+print(head(renew_2023_clean$state, 10))
+
+total_2023 <- read.csv("data/total-use-2023.csv", stringsAsFactors = FALSE)
+
+names(total_2023) <- tolower(names(total_2023))
+names(total_2023) <- str_replace_all(names(total_2023), "[ .]", "_")
+
+cat("\nTotal Energy Column Names (standardized):\n")
+print(names(total_2023)[1:10])
+
+total_long <- total_2023 |>
+  pivot_longer(
+    cols = -energy_source,  # All columns except energy_source
+    names_to = "state",
+    values_to = "energy_use"
+  ) |>
+  mutate(
+    state = toupper(state),
+    state = str_trim(state))
+
+cat("\nState names in total energy data (first 10):\n")
+print(head(unique(total_long$state), 10))
+
+total_by_state <- total_long |>
+  group_by(state) |>
+  summarize(total_energy = sum(energy_use, na.rm = TRUE))
 ```
 
 ## **Part 3: Joining / Pivoting Datasets for Analysis**
 
 ```{r}
+cat("\n=== Checking State Name Consistency ===\n")
+cat("States in renewable data:", length(unique(renew_total$state)), "\n")
+cat("States in total energy data:", length(unique(total_by_state$state)), "\n")
 
+states_renew <- unique(renew_total$state)
+states_total <- unique(total_by_state$state)
+cat("States only in renewable data:", setdiff(states_renew, states_total), "\n")
+cat("States only in total data:", setdiff(states_total, states_renew), "\n")
+
+energy_data <- renew_total %>%
+  left_join(total_by_state, by = "state")
+
+energy_data <- energy_data %>%
+  mutate(renewable_pct = (total_renewable / total_energy) * 100) %>%
+  filter(state != "US")
+
+cat("\n=== Preview of Joined Dataset ===\n")
+print(head(energy_data, 10))
 ```
 
 ## **Part 4: Mapping Visualization**
 
 ```{r}
+top_states <- energy_data |>
+  arrange(desc(renewable_pct)) |>
+  head(15)
 
+p1 <- ggplot(top_states, aes(x = reorder(state, renewable_pct), y = renewable_pct)) +
+  geom_col(aes(fill = renewable_pct), show.legend = FALSE) +
+  scale_fill_gradient(low = "#d1fae5", high = "#064e3b") +
+  coord_flip() +
+  geom_text(aes(label = paste0(round(renewable_pct, 1), "%")), 
+            hjust = -0.1, size = 3.5) +
+  labs(
+    title = "Top 15 States by Renewable Energy Share (2023)",
+    subtitle = "States with the cleanest electricity for EV charging",
+    x = "State",
+    y = "Renewable Energy (%)",
+    caption = "Research Question: Which states provide the cleanest electricity for charging EVs?"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(size = 11, color = "gray40"),
+    axis.text = element_text(size = 10),
+    panel.grid.minor = element_blank()
+  ) +
+  ylim(0, max(top_states$renewable_pct) * 1.1)
+
+print(p1)
+ggsave("renewable_bar_chart.png", plot = p1, width = 10, height = 8, dpi = 300)
 ```
+
+## **Part 5: Final Deliverable

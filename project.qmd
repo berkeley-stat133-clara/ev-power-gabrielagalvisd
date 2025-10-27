@@ -6,8 +6,7 @@ format: stat133handout-typst
 
 ### **Main Research Question**
 
-*Electric vehicles reduce direct emissions, but does the electricity used to charge them actually come from clean sources?\
-*
+Electric vehicles reduce direct emissions, but does the electricity used to charge them actually come from clean sources?
 
 ### **Datasets Provided**
 
@@ -42,6 +41,16 @@ Brainstorm some questions about the datasets that you would like to answer throu
 -   *Examples*: How has the share of renewable energy changed from 2021–2023 across states? What is the share of electricity that comes from clean sources by state? Do states with higher renewable usage have lower average electricity prices? Are EV registrations concentrated in states with cleaner energy mixes? Which regions show the fastest growth in renewable energy?
 
 -   You should be able to explore each question using the datasets provided. Try to come up with some creative questions that you are interested in learning the answers to!
+
+1. Which states have shown the biggest increase in renewable energy as a percentage of total energy use from 2021 to 2023, and do these states also have high EV adoption rates?
+2. Is there a relationship between the proportion of renewable energy in a state's energy mix and the average electricity price? 
+3. Is there a correlation between states' renewable energy share and the number of EV registrations?
+4. Are there geographic clusters of states with both high renewable energy percentages AND high EV registrations, suggesting "clean transportation corridors"?
+5. Which states have the best renewable energy per unit of total energy consumption, and how does this correlate with their EV registration numbers?
+6. What percentage of each state's total energy came from renewable sources in 2023, and how does this map geographically across the US?
+
+
+
 
 ### **Part 2: Data Preparation & Cleaning**
 
