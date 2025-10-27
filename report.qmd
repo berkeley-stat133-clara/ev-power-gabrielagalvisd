@@ -22,6 +22,14 @@ library(ggplot2)
 
 Chosen Question: What percentage of each state's total energy came from renewable sources in 2023, and how does this map geographically across the US?
 
+#### Example Questions and Example Graph
+1. Which states have shown the biggest increase in renewable energy as a percentage of total energy use from 2021 to 2023, and do these states also have high EV adoption rates?
+2. Is there a relationship between the proportion of renewable energy in a state's energy mix and the average electricity price? 
+3. Is there a correlation between states' renewable energy share and the number of EV registrations?
+4. Are there geographic clusters of states with both high renewable energy percentages AND high EV registrations, suggesting "clean transportation corridors"?
+5. Which states have the best renewable energy per unit of total energy consumption, and how does this correlate with their EV registration numbers?
+6. What percentage of each state's total energy came from renewable sources in 2023, and how does this map geographically across the US?
+
 ```{r}
 top_10 <- energy_data %>% arrange(desc(renewable_pct)) %>% head(10)
 bottom_10 <- energy_data %>% arrange(renewable_pct) %>% head(10)
@@ -152,3 +160,8 @@ ggsave("renewable_bar_chart.png", plot = p1, width = 10, height = 8, dpi = 300)
 ```
 
 ## **Part 5: Final Deliverable
+The data reveal significant variation in the share of electricity created from renewable sources across the US. States such as Vermont, Maine, and Washington lead the nation, each producing over 80% of their electricity from renewable energy. In contrast, states including West Virginia, Ohio, and Kentucky remain heavily dependent on fossil fuels, with less than 10% of their electricity coming from renewables.
+A clear geographic pattern rises: the western states, upper Midwest, and New England are the primary clean energy leaders, while fossil fuel reliance persists in the southern and Appalachian regions. These spatial disparities highlight both regional resource differences and varied commitments towards renewable energy development.
+
+How the Map Answers the Question:
+The map offers a visual representation of where electric vehicles (EVs) would be charged using the cleanest electricity. By illustrating regional contrasts in renewable energy reliance, it highlights policy and infrastructure gaps that may limit the environmental benefits of EV adoption in certain areas. The visualization then provides a valuable tool for identifying regions where expanding renewable capacity could make clean transportation more equitable and effective nationwide.
